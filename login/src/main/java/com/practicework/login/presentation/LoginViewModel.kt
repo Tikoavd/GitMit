@@ -60,6 +60,12 @@ class LoginViewModel @Inject constructor(
                     current.copy(isError = false, errorMessage = "")
                 }
             }
+
+            LoginEvent.NavigateSignedIn -> {
+                _uiState.update { current ->
+                    current.copy(isSignedIn = false)
+                }
+            }
         }
     }
 
