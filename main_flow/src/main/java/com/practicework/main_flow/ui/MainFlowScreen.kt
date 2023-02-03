@@ -11,12 +11,14 @@ import androidx.navigation.compose.rememberNavController
 @SuppressLint("UnusedMaterialScaffoldPaddingParameter")
 @Composable
 fun MainFlowScreen(
+    navigateOnSignOut: () -> Unit,
     navHostController: NavHostController = rememberNavController(),
 ) {
     Scaffold(
         bottomBar = {
             BottomNavigationBar(navController = navHostController)
-        }
+        },
+        backgroundColor = MaterialTheme.colors.background
     ) {
         Surface(Modifier.fillMaxHeight(0.92f)) {
             MainFlowNavigationGraph(navController = navHostController)

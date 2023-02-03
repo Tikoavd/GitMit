@@ -1,10 +1,15 @@
 package com.practicework.gitmit.ui.theme
 
+import android.util.Log
 import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.material.MaterialTheme
 import androidx.compose.material.darkColors
 import androidx.compose.material.lightColors
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.getValue
+import androidx.hilt.navigation.compose.hiltViewModel
+import com.practicework.gitmit.presentation.ThemeViewModel
 
 private val DarkColorPalette = darkColors(
     primary = DarkGreen,
@@ -28,11 +33,16 @@ private val LightColorPalette = lightColors(
 )
 
 @Composable
-fun GitMitTheme(darkTheme: Boolean = isSystemInDarkTheme(), content: @Composable () -> Unit) {
-    val colors = if (darkTheme) {
-        DarkColorPalette
-    } else {
-        LightColorPalette
+fun GitMitTheme(
+    vm: ThemeViewModel = hiltViewModel(),
+    content: @Composable () -> Unit
+) {
+    val isDarkTheme by vm.nightMode.collectAsState()
+    Log.e("theme", "comp: $isDarkTheme")
+    val colors = when (isDarkTheme) {
+        true -> { DarkColorPalette }
+        false -> { LightColorPalette }
+        else -> { if (isSystemInDarkTheme()) { DarkColorPalette} else LightColorPalette }
     }
 
     MaterialTheme(
