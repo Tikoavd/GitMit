@@ -1,32 +1,59 @@
 package com.practicework.login.data.source
 
 import com.practicework.core.retrofit.call_handler.Resource
-import com.practicework.core.room.call_handler.DbResource
-import com.practicework.login.data.local_data_source.LocalDataSource
-import com.practicework.login.data.remote_data_source.source.RemoteDataSource
+import com.practicework.login.data.local_data_source.LoginLocalDataSource
+import com.practicework.login.data.remote_data_source.source.LoginRemoteDataSource
 import com.practicework.login.domain.LoginRepository
-import com.practicework.login.domain.models.User
-import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.flow.*
 import javax.inject.Inject
 
 class LoginRepositoryImpl @Inject constructor(
-    private val remoteDataSource: RemoteDataSource,
-    private val localDataSource: LocalDataSource
+    private val remoteDataSource: LoginRemoteDataSource,
+    private val localDataSource: LoginLocalDataSource
 ) : LoginRepository {
 
-    override suspend fun getUserFromApi(): Flow<Resource<User>> {
-        return remoteDataSource.getUser()
+    override fun tryToSignIn(token: String): Flow<Resource<Unit>> {
+        localDataSource.saveToken(token)
+        return flow {
+            remoteDataSource.getUser()
+                .onEach { resource ->
+                    when (resource) {
+                        is Resource.Error -> {
+                            emit(Resource.Error(resource.exception, null))
+                        }
+                        Resource.Loading -> {
+                            emit(Resource.Loading)
+                        }
+                        is Resource.Success -> {
+                            localDataSource.insertUser(resource.model)
+                            emit(Resource.Success(Unit))
+                        }
+                    }
+                }
+                .flowOn(Dispatchers.IO)
+                .collect()
+        }
     }
 
-    override fun getUserFromDb(): Flow<DbResource<User>> {
-        return localDataSource.getUser()
-    }
-
-    override suspend fun insertUserToDb(user: User) {
-        localDataSource.insertUser(user)
-    }
-
-    override suspend fun deleteUserFromDb() {
-        localDataSource.deleteUser()
+    override fun tryToSignInFromDb(): Flow<Resource<Unit>> {
+        return flow {
+            localDataSource.getUser()
+                .onEach { resource ->
+                    when (resource) {
+                        is Resource.Error -> {
+                            emit(Resource.Error(resource.exception, null))
+                        }
+                        Resource.Loading -> {
+                            emit(Resource.Loading)
+                        }
+                        is Resource.Success -> {
+                            emit(Resource.Success(Unit))
+                        }
+                    }
+                }
+                .flowOn(Dispatchers.IO)
+                .collect()
+        }
     }
 }

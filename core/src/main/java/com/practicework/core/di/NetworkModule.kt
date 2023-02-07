@@ -1,5 +1,6 @@
 package com.practicework.core.di
 
+import com.practicework.core.BuildConfig
 import com.practicework.core.retrofit.interceptors.AuthInterceptor
 import dagger.Module
 import dagger.Provides
@@ -12,10 +13,6 @@ import javax.inject.Qualifier
 
 @Qualifier
 @Retention(AnnotationRetention.BINARY)
-annotation class AuthInterceptorOkHttpClient
-
-@Qualifier
-@Retention(AnnotationRetention.BINARY)
 annotation class RetrofitAuth
 
 @Module
@@ -23,7 +20,6 @@ annotation class RetrofitAuth
 object NetworkModule {
 
     @Provides
-    @AuthInterceptorOkHttpClient
     fun provideAuthOkHttpClient(authInterceptor: AuthInterceptor) : OkHttpClient {
         return OkHttpClient.Builder()
             .addInterceptor(authInterceptor)
@@ -32,10 +28,10 @@ object NetworkModule {
 
     @Provides
     @RetrofitAuth
-    fun provideRetrofit(@AuthInterceptorOkHttpClient client: OkHttpClient) : Retrofit {
+    fun provideRetrofit(client: OkHttpClient) : Retrofit {
         return Retrofit.Builder()
             .client(client)
-            .baseUrl(BASE_URL)
+            .baseUrl(BuildConfig.BASE_URL)
             .addConverterFactory(GsonConverterFactory.create())
             .build()
     }

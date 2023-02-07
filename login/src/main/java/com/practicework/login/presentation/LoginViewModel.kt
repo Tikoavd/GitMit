@@ -8,22 +8,16 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.practicework.core.di.SHARED_PREF_NAME
-import com.practicework.core.di.TOKEN
-import com.practicework.core.retrofit.call_handler.NO_INTERNET_ACCESS
+import com.practicework.core.retrofit.call_handler.ErrorTypes
 import com.practicework.core.retrofit.call_handler.Resource
-import com.practicework.core.room.call_handler.DbResource
+import com.practicework.login.BuildConfig
 import com.practicework.login.domain.LoginRepository
-import com.practicework.login.domain.models.User
-import com.practicework.login.domain.usecases.DeleteUserFromDbUseCase
-import com.practicework.login.domain.usecases.GetUserFromApiUseCase
-import com.practicework.login.domain.usecases.GetUserFromDbUseCase
-import com.practicework.login.domain.usecases.InsertUserToDbUseCase
+import com.practicework.login.domain.usecases.TryToSignInFromDbUseCase
+import com.practicework.login.domain.usecases.TryToSignInUseCase
 import dagger.hilt.android.lifecycle.HiltViewModel
 import dagger.hilt.android.qualifiers.ApplicationContext
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.*
-import kotlinx.coroutines.launch
 import javax.inject.Inject
 
 @HiltViewModel
@@ -32,10 +26,8 @@ class LoginViewModel @Inject constructor(
     loginRepository: LoginRepository
 ) : ViewModel() {
 
-    private val getUserFromApiUseCase = GetUserFromApiUseCase(loginRepository)
-    private val getUserFromDbUseCase = GetUserFromDbUseCase(loginRepository)
-    private val insertUserToDbUseCase = InsertUserToDbUseCase(loginRepository)
-    private val deleteUserFromDbUseCase = DeleteUserFromDbUseCase(loginRepository)
+    private val tryToSignIn by lazy { TryToSignInUseCase(loginRepository) }
+    private val tryToSignInFromDb by lazy { TryToSignInFromDbUseCase(loginRepository) }
 
     var userInput by mutableStateOf("")
         private set
@@ -44,10 +36,8 @@ class LoginViewModel @Inject constructor(
     val uiState: StateFlow<LoginState>
         get() = _uiState.asStateFlow()
 
-    private var firstCheck = true
-
     init {
-        getUser()
+        tryToSignInOnLaunch()
     }
 
     fun send(loginEvent: LoginEvent) {
@@ -61,8 +51,7 @@ class LoginViewModel @Inject constructor(
             }
 
             LoginEvent.SignIn -> {
-                saveToken()
-                getUser()
+                signIn()
             }
 
             LoginEvent.CloseError -> {
@@ -73,75 +62,76 @@ class LoginViewModel @Inject constructor(
         }
     }
 
+    private fun tryToSignInOnLaunch() {
+        tryToSignInFromDb()
+            .onEach { resource ->
+                when (resource) {
+                    is Resource.Error -> {
+                        loadingOff()
+                    }
+                    Resource.Loading -> {
+                        loadingOn()
+                    }
+                    is Resource.Success -> {
+                        signedInSuccess()
+                    }
+                }
+            }
+            .flowOn(Dispatchers.IO)
+            .launchIn(viewModelScope)
+    }
+
+    private fun signIn() {
+        tryToSignIn(userInput)
+            .onEach { resource ->
+                when (resource) {
+                    is Resource.Error -> {
+                        loadingOff()
+                        handleError(resource.exception)
+                    }
+                    Resource.Loading -> {
+                        loadingOn()
+                    }
+                    is Resource.Success -> {
+                        signedInSuccess()
+                    }
+                }
+            }
+            .flowOn(Dispatchers.IO)
+            .launchIn(viewModelScope)
+    }
+
     private fun getToken() {
         val intent = Intent(Intent.ACTION_VIEW).apply {
-            data = Uri.parse(GET_TOKEN_URL)
+            data = Uri.parse(BuildConfig.GET_TOKEN_URL)
             addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
         }
         context.startActivity(intent)
-    }
-
-    private fun saveToken() {
-        context.getSharedPreferences(SHARED_PREF_NAME, Context.MODE_PRIVATE).edit()
-            .putString(TOKEN, userInput)
-            .apply()
     }
 
     private fun inputChange(input: String) {
         userInput = input
     }
 
-    private fun getUser() {
-        viewModelScope.launch {
-            getUserFromApiUseCase()
-                .onEach { resource ->
-                    when (resource) {
-                        is Resource.Error -> {
-                            handleError(resource.exception)
-                        }
-                        Resource.Loading -> {
-                            loadingOn()
-                        }
-                        is Resource.Success -> {
-                            handleSuccess(resource.model)
-                        }
-                    }
-                }
-                .flowOn(Dispatchers.IO)
-                .launchIn(viewModelScope)
-        }
-    }
-
     private fun handleError(exception: Exception) {
-        if (exception.message == NO_INTERNET_ACCESS && firstCheck) {
-            getUserFromDbUseCase()
-                .onEach { resource ->
-                    if (resource is DbResource.Success) {
-                        signedInSuccess()
-                    }
-                }
-                .flowOn(Dispatchers.IO)
-                .launchIn(viewModelScope)
-        }
-        else {
-            if (!firstCheck) {
-                _uiState.update { current ->
-                    current.copy(isError = true, errorMessage = exception.message.toString())
-                }
+        val message = when (exception.message) {
+            ErrorTypes.EMPTY_RESPONSE.message -> {
+                ErrorMessages.UNKNOWN_ACCOUNT
             }
-            viewModelScope.launch {
-                deleteUserFromDbUseCase()
+            ErrorTypes.NOT_SUCCESSFULLY_REQUEST.message -> {
+                ErrorMessages.INVALID_TOKEN
+            }
+            ErrorTypes.NO_INTERNET_ACCESS.message -> {
+                ErrorTypes.NO_INTERNET_ACCESS.message
+            }
+            else -> {
+                ErrorTypes.COULD_NOT_FETCH.message
             }
         }
-        firstCheck = false
-        loadingOff()
-    }
 
-    private fun handleSuccess(user: User) {
-        viewModelScope.launch {
-            insertUserToDbUseCase(user)
+        _uiState.update { current ->
+            current.copy(isError = true, errorMessage = message)
         }
-        signedInSuccess()
         loadingOff()
     }
 
@@ -161,9 +151,5 @@ class LoginViewModel @Inject constructor(
         _uiState.update { current ->
             current.copy(isSignedIn = true)
         }
-    }
-
-    companion object {
-        private const val GET_TOKEN_URL = "https://github.com/settings/tokens"
     }
 }

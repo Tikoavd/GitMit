@@ -5,8 +5,6 @@ import kotlinx.coroutines.flow.flow
 import retrofit2.Response
 import java.net.UnknownHostException
 
-const val NO_INTERNET_ACCESS = "Can not connect to network"
-
 inline fun <RESPONSE, RESULT> safeApiCall(
     crossinline mapper: (RESPONSE) -> RESULT,
     crossinline body: suspend () -> Response<RESPONSE>
@@ -18,18 +16,18 @@ inline fun <RESPONSE, RESULT> safeApiCall(
             if (response.isSuccessful) {
                 response.body()?.let {
                     emit(Resource.Success(mapper(it)))
-                }
+                } ?: emit(Resource.Error(Exception(ErrorTypes.EMPTY_RESPONSE.message), null))
             } else {
-                val exception = Exception("Invalid Token")
+                val exception = Exception(ErrorTypes.NOT_SUCCESSFULLY_REQUEST.message)
                 emit(Resource.Error(exception, null))
             }
         } catch (t: Throwable) {
             val exception = when (t) {
                 is UnknownHostException -> {
-                    Exception(NO_INTERNET_ACCESS)
+                    Exception(ErrorTypes.NO_INTERNET_ACCESS.message)
                 }
                 else -> {
-                    Exception("Could not fetch from network")
+                    Exception(ErrorTypes.COULD_NOT_FETCH.message)
                 }
             }
             emit(Resource.Error(exception = exception, null))
