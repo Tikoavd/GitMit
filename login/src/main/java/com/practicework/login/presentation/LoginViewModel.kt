@@ -8,6 +8,7 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.practicework.core.coroutines.CommonDispatchers
 import com.practicework.core.retrofit.call_handler.ErrorTypes
 import com.practicework.core.retrofit.call_handler.Resource
 import com.practicework.login.BuildConfig
@@ -16,14 +17,14 @@ import com.practicework.login.domain.usecases.TryToSignInFromDbUseCase
 import com.practicework.login.domain.usecases.TryToSignInUseCase
 import dagger.hilt.android.lifecycle.HiltViewModel
 import dagger.hilt.android.qualifiers.ApplicationContext
-import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.*
 import javax.inject.Inject
 
 @HiltViewModel
 class LoginViewModel @Inject constructor(
     @ApplicationContext private val context: Context,
-    loginRepository: LoginRepository
+    loginRepository: LoginRepository,
+    private val dispatchers: CommonDispatchers
 ) : ViewModel() {
 
     private val tryToSignIn by lazy { TryToSignInUseCase(loginRepository) }
@@ -77,7 +78,7 @@ class LoginViewModel @Inject constructor(
                     }
                 }
             }
-            .flowOn(Dispatchers.IO)
+            .flowOn(dispatchers.ioDispatcher)
             .launchIn(viewModelScope)
     }
 
@@ -97,7 +98,7 @@ class LoginViewModel @Inject constructor(
                     }
                 }
             }
-            .flowOn(Dispatchers.IO)
+            .flowOn(dispatchers.ioDispatcher)
             .launchIn(viewModelScope)
     }
 

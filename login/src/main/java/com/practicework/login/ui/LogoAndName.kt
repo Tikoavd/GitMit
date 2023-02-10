@@ -9,6 +9,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.practicework.login.R
@@ -31,15 +32,13 @@ internal fun LogoAndName() {
             contentDescription = "logo",
             contentScale = ContentScale.FillHeight
         )
-        Box(
-            modifier = Modifier.fillMaxSize(),
-            contentAlignment = Alignment.Center
-        ) {
-            Text(
-                fontSize = 50.sp,
-                text = "GitMit",
-            )
-        }
+
+        Text(
+            modifier = Modifier.fillMaxWidth(),
+            textAlign = TextAlign.Center,
+            fontSize = 50.sp,
+            text = "GitMit",
+        )
 
     }
 }
