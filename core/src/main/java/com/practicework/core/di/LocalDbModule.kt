@@ -22,7 +22,7 @@ object LocalDbModule {
         return Room.databaseBuilder(
             context,
             AppDatabase::class.java,
-            "gitmit.db"
+            DB_NAME
         ).build()
     }
 

@@ -4,10 +4,10 @@ import androidx.room.Database
 import androidx.room.RoomDatabase
 import com.practicework.core.room.dao.ReposDao
 import com.practicework.core.room.dao.UserDao
-import com.practicework.core.room.models.RepoDbModel
-import com.practicework.core.room.models.UserDbModel
+import com.practicework.core.room.models.RepoEntity
+import com.practicework.core.room.models.UserEntity
 
-@Database(entities = [UserDbModel::class, RepoDbModel::class], version = 1)
+@Database(entities = [UserEntity::class, RepoEntity::class], version = 1)
 abstract class AppDatabase : RoomDatabase() {
 
     abstract fun userDao() : UserDao

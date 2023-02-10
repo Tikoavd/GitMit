@@ -43,10 +43,10 @@ object NetworkModule {
 
     @Provides
     @RetrofitAuthRx
-    fun provideRetrofitRx(@AuthInterceptorOkHttpClient client: OkHttpClient) : Retrofit {
+    fun provideRetrofitRx(client: OkHttpClient) : Retrofit {
         return Retrofit.Builder()
             .client(client)
-            .baseUrl(BASE_URL)
+            .baseUrl(BuildConfig.BASE_URL)
             .addConverterFactory(GsonConverterFactory.create())
             .addCallAdapterFactory(RxJava3CallAdapterFactory.create())
             .build()

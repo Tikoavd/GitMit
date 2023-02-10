@@ -3,10 +3,10 @@ package com.practicework.repos.data.remote_data_source.models
 import com.google.gson.annotations.SerializedName
 
 data class RepoApiModel(
-    @SerializedName("name")
-    val name: String,
-    @SerializedName("language")
+    @SerializedName(RepoApiModelConfigs.NAME)
+    val name: String?,
+    @SerializedName(RepoApiModelConfigs.LANGUAGE)
     val language: String?,
-    @SerializedName("visibility")
-    val visibility: String
+    @SerializedName(RepoApiModelConfigs.VISIBILITY)
+    val visibility: String?
 )

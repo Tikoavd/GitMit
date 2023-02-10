@@ -1,6 +1,6 @@
 package com.practicework.repos.data.local_data_source
 
-import com.practicework.core.room.call_handler.DbResource
+import com.practicework.core.retrofit.call_handler.Resource
 import com.practicework.core.room.call_handler.safeRxDbCall
 import com.practicework.core.room.dao.ReposDao
 import com.practicework.repos.data.source.Mappers
@@ -9,11 +9,11 @@ import io.reactivex.rxjava3.core.Flowable
 import io.reactivex.rxjava3.schedulers.Schedulers
 import javax.inject.Inject
 
-class LocalDataSourceImpl @Inject constructor(
+class ReposLocalDataSourceImpl @Inject constructor(
     private val reposDao: ReposDao
-) : LocalDataSource {
+) : ReposLocalDataSource {
     override fun insertRepos(list: List<Repo>) {
-        reposDao.insertRepos(Mappers.mapRepoListToRepoDbModelList(list))
+        reposDao.insertRepos(Mappers.mapRepoListToRepoEntityList(list))
             .subscribeOn(Schedulers.io())
             .subscribe()
     }
@@ -22,9 +22,9 @@ class LocalDataSourceImpl @Inject constructor(
         reposDao.clearRepos().subscribeOn(Schedulers.io()).subscribe()
     }
 
-    override fun getRepos(offset: Int, select: Int): Flowable<DbResource<List<Repo>>> {
+    override fun getRepos(offset: Int, select: Int): Flowable<Resource<List<Repo>>> {
         return safeRxDbCall(
-            mapper = { Mappers.mapRepoDbModelListToRepoList(it) },
+            mapper = { Mappers.mapRepoEntityListToRepoList(it) },
             body = { reposDao.getRepos(offset, select) }
         )
     }

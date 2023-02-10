@@ -1,6 +1,6 @@
 package com.practicework.repos.data.source
 
-import com.practicework.core.room.models.RepoDbModel
+import com.practicework.core.room.models.RepoEntity
 import com.practicework.repos.data.remote_data_source.models.RepoApiModel
 import com.practicework.repos.domain.models.Repo
 
@@ -8,31 +8,31 @@ object Mappers {
 
     fun mapRepoApiModelToRepo(repoApiModel: RepoApiModel): Repo =
         Repo(
-            name = repoApiModel.name,
+            name = repoApiModel.name ?: Repo.UNKNOWN_FIELD_VALUE,
             language = repoApiModel.language ?: "unknown",
-            visibility = repoApiModel.visibility
+            visibility = repoApiModel.visibility ?: Repo.UNKNOWN_FIELD_VALUE
         )
 
     fun mapRepoApiModelListToRepoList(repoApiModelList: List<RepoApiModel>) : List<Repo> =
         repoApiModelList.map { mapRepoApiModelToRepo(it) }
 
-    fun mapRepoDbModelToRepo(repoDbModel: RepoDbModel) : Repo =
+    fun mapRepoEntityToRepo(repoEntity: RepoEntity) : Repo =
         Repo(
-            name = repoDbModel.name,
-            language = repoDbModel.language,
-            visibility = repoDbModel.visibility
+            name = repoEntity.name,
+            language = repoEntity.language,
+            visibility = repoEntity.visibility
         )
 
-    fun mapRepoDbModelListToRepoList(repoDbModelList: List<RepoDbModel>) : List<Repo> =
-        repoDbModelList.map { mapRepoDbModelToRepo(it) }
+    fun mapRepoEntityListToRepoList(repoEntityList: List<RepoEntity>) : List<Repo> =
+        repoEntityList.map { mapRepoEntityToRepo(it) }
 
-    fun mapRepoToRepoDbModel(repo: Repo) : RepoDbModel =
-        RepoDbModel(
+    fun mapRepoToRepoEntity(repo: Repo) : RepoEntity =
+        RepoEntity(
             name = repo.name,
             language = repo.language,
             visibility = repo.visibility
         )
 
-    fun mapRepoListToRepoDbModelList(repoList: List<Repo>) : List<RepoDbModel> =
-        repoList.map { mapRepoToRepoDbModel(it) }
+    fun mapRepoListToRepoEntityList(repoList: List<Repo>) : List<RepoEntity> =
+        repoList.map { mapRepoToRepoEntity(it) }
 }

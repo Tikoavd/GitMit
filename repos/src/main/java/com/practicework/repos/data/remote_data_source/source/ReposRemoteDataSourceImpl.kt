@@ -6,12 +6,11 @@ import com.practicework.repos.data.remote_data_source.retrofit.ReposApiService
 import com.practicework.repos.data.source.Mappers
 import com.practicework.repos.domain.models.Repo
 import io.reactivex.rxjava3.core.Flowable
-import io.reactivex.rxjava3.core.Single
 import javax.inject.Inject
 
-class RemoteDataSourceImpl @Inject constructor(
+class ReposRemoteDataSourceImpl @Inject constructor(
     private val apiService: ReposApiService
-) : RemoteDataSource {
+) : ReposRemoteDataSource {
 
     override fun getMyRepos(perPage: Int, page: Int): Flowable<Resource<List<Repo>>> {
         return safeRxApiCall(

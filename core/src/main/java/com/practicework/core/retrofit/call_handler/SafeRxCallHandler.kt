@@ -22,10 +22,10 @@ inline fun <RESPONSE : Any, RESULT> safeRxApiCall(
                 { t ->
                     val exception = when (t) {
                         is UnknownHostException -> {
-                            Exception(NO_INTERNET_ACCESS)
+                            Exception(ErrorTypes.NO_INTERNET_ACCESS.message)
                         }
                         else -> {
-                            Exception("Could not fetch from network")
+                            Exception(ErrorTypes.COULD_NOT_FETCH.message)
                         }
                     }
                     subscriber.onNext(Resource.Error(exception = exception, null))

@@ -1,9 +1,7 @@
 package com.practicework.repos.presentation
 
 import androidx.lifecycle.ViewModel
-import com.practicework.core.retrofit.call_handler.NO_INTERNET_ACCESS
 import com.practicework.core.retrofit.call_handler.Resource
-import com.practicework.core.room.call_handler.DbResource
 import com.practicework.repos.domain.ReposRepository
 import com.practicework.repos.domain.models.Repo
 import com.practicework.repos.domain.usecases.*
@@ -18,14 +16,10 @@ import javax.inject.Inject
 
 @HiltViewModel
 class ReposViewModel @Inject constructor(
-    private val reposRepository: ReposRepository
+    reposRepository: ReposRepository
 ) : ViewModel() {
 
-    private val getReposFromApi = GetReposFromApiUseCase(reposRepository)
-    private val getReposFromDb = GetReposFromDbUseCase(reposRepository)
-    private val clearReposFromDb = ClearReposFromDbUseCase(reposRepository)
-    private val insertReposToDb = InsertReposToDbUseCase(reposRepository)
-    private val updateReposInDb = UpdateReposInDbUseCase(reposRepository)
+    private val getRepos = GetReposFromApiUseCase(reposRepository)
 
     private val _uiState = MutableStateFlow(ReposState())
     val uiState: StateFlow<ReposState>
@@ -53,7 +47,7 @@ class ReposViewModel @Inject constructor(
     }
 
     private fun getRepos() {
-        getReposFromApi(PER_PAGE_VALUE, page)
+        getRepos(PER_PAGE_VALUE, page)
             .subscribeOn(Schedulers.io())
             .observeOn(AndroidSchedulers.mainThread())
             .subscribe { resource ->
@@ -63,7 +57,7 @@ class ReposViewModel @Inject constructor(
                     }
 
                     is Resource.Error -> {
-                        handleError(resource.exception)
+                        handleError()
                     }
 
                     else -> {}
@@ -71,40 +65,12 @@ class ReposViewModel @Inject constructor(
             }
     }
 
-    private fun handleError(exc: Exception) {
-        if (exc.message == NO_INTERNET_ACCESS) {
-            updateReposFromDb()
-        }
+    private fun handleError() {
+        endReached = true
 
         _uiState.update { current ->
             current.copy(isLoading = false, isUpdating = false)
         }
-    }
-
-    private fun updateReposFromDb() {
-        val offset = (page - 1) * PER_PAGE_VALUE
-        getReposFromDb(offset, PER_PAGE_VALUE)
-            .subscribeOn(Schedulers.io())
-            .observeOn(AndroidSchedulers.mainThread())
-            .subscribe { dbResource ->
-                when (dbResource) {
-                    DbResource.Error -> {
-                        endReached = true
-                    }
-                    is DbResource.Success -> {
-                        if (dbResource.model.isNotEmpty()) {
-                            _uiState.update { current ->
-                                val newList = current.repos + dbResource.model
-                                current.copy(repos = newList)
-                            }
-                        }
-                        else {
-                            endReached = true
-                        }
-                    }
-                }
-            }
-        page++
     }
 
     private fun handleSuccess(appendList: List<Repo>) {
@@ -118,12 +84,6 @@ class ReposViewModel @Inject constructor(
             _uiState.update { current ->
                 val newList = current.repos + appendList
                 current.copy(repos = newList, isLoading = false, isUpdating = false)
-            }
-            if (page == 1) {
-                updateReposInDb(appendList)
-            }
-            else {
-                insertReposToDb(appendList)
             }
             page++
         }
