@@ -6,5 +6,5 @@ import io.reactivex.rxjava3.core.Flowable
 
 interface ReposRepository {
 
-    fun getRepos(perPage: Int, page: Int) : Flowable<Resource<List<Repo>>>
+    fun getRepos(perPage: Int, page: Int, offset: Int) : Flowable<Resource<List<Repo>>>
 }

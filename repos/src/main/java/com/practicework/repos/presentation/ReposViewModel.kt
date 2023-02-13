@@ -2,12 +2,11 @@ package com.practicework.repos.presentation
 
 import androidx.lifecycle.ViewModel
 import com.practicework.core.retrofit.call_handler.Resource
+import com.practicework.core.rx.CommonRxThreads
 import com.practicework.repos.domain.ReposRepository
 import com.practicework.repos.domain.models.Repo
-import com.practicework.repos.domain.usecases.*
+import com.practicework.repos.domain.usecases.GetReposFromApiUseCase
 import dagger.hilt.android.lifecycle.HiltViewModel
-import io.reactivex.rxjava3.android.schedulers.AndroidSchedulers
-import io.reactivex.rxjava3.schedulers.Schedulers
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
@@ -16,7 +15,8 @@ import javax.inject.Inject
 
 @HiltViewModel
 class ReposViewModel @Inject constructor(
-    reposRepository: ReposRepository
+    reposRepository: ReposRepository,
+    private val rxThreads: CommonRxThreads
 ) : ViewModel() {
 
     private val getRepos = GetReposFromApiUseCase(reposRepository)
@@ -48,8 +48,8 @@ class ReposViewModel @Inject constructor(
 
     private fun getRepos() {
         getRepos(PER_PAGE_VALUE, page)
-            .subscribeOn(Schedulers.io())
-            .observeOn(AndroidSchedulers.mainThread())
+            .subscribeOn(rxThreads.ioThread)
+            .observeOn(rxThreads.mainThread)
             .subscribe { resource ->
                 when (resource) {
                     is Resource.Success -> {
@@ -60,7 +60,7 @@ class ReposViewModel @Inject constructor(
                         handleError()
                     }
 
-                    else -> {}
+                    else -> Unit
                 }
             }
     }

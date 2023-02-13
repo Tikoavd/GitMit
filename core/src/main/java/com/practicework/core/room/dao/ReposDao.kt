@@ -2,6 +2,7 @@ package com.practicework.core.room.dao
 
 import androidx.room.Dao
 import androidx.room.Insert
+import androidx.room.OnConflictStrategy
 import androidx.room.Query
 import com.practicework.core.room.models.RepoConfigs
 import com.practicework.core.room.models.RepoEntity
@@ -11,7 +12,7 @@ import io.reactivex.rxjava3.core.Flowable
 @Dao
 interface ReposDao {
 
-    @Insert
+    @Insert(onConflict = OnConflictStrategy.REPLACE)
     fun insertRepos(list: List<RepoEntity>) : Completable
 
     @Query("DELETE FROM ${RepoConfigs.TABLE_NAME}")

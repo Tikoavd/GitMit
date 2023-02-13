@@ -8,8 +8,6 @@ interface ReposLocalDataSource {
 
     fun insertRepos(list: List<Repo>)
 
-    fun clearRepos()
-
     fun getRepos(offset: Int, select: Int) : Flowable<Resource<List<Repo>>>
 
     fun updateRepos(list: List<Repo>)
