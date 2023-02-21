@@ -8,12 +8,17 @@ import dagger.hilt.InstallIn
 import dagger.hilt.components.SingletonComponent
 import okhttp3.OkHttpClient
 import retrofit2.Retrofit
+import retrofit2.adapter.rxjava3.RxJava3CallAdapterFactory
 import retrofit2.converter.gson.GsonConverterFactory
 import javax.inject.Qualifier
 
 @Qualifier
 @Retention(AnnotationRetention.BINARY)
 annotation class RetrofitAuth
+
+@Qualifier
+@Retention(AnnotationRetention.BINARY)
+annotation class RetrofitAuthRx
 
 @Module
 @InstallIn(SingletonComponent::class)
@@ -33,6 +38,17 @@ object NetworkModule {
             .client(client)
             .baseUrl(BuildConfig.BASE_URL)
             .addConverterFactory(GsonConverterFactory.create())
+            .build()
+    }
+
+    @Provides
+    @RetrofitAuthRx
+    fun provideRetrofitRx(client: OkHttpClient) : Retrofit {
+        return Retrofit.Builder()
+            .client(client)
+            .baseUrl(BuildConfig.BASE_URL)
+            .addConverterFactory(GsonConverterFactory.create())
+            .addCallAdapterFactory(RxJava3CallAdapterFactory.create())
             .build()
     }
 }

@@ -6,18 +6,17 @@ import kotlinx.coroutines.flow.*
 inline fun <DBMODEL, MODEL> safeDbCall(
     crossinline mapper: (DBMODEL) -> MODEL,
     crossinline body: () -> Flow<DBMODEL?>
-) : Flow<Resource<MODEL>> {
-    return flow {
-        emit(Resource.Loading)
-        body.invoke()
-            .onEach { dbModel ->
-                dbModel?.let {
-                    emit(Resource.Success(mapper(dbModel)))
-                } ?: emit(Resource.Error(Exception(DbErrors.UNKNOWN_DATA), null))
-            }
-            .catch {
-                emit(Resource.Error(Exception(DbErrors.CAN_NOT_ACCESS_TO_DB), null))
-            }
-            .collect()
-    }
+): Flow<Resource<MODEL>> {
+    return body()
+        .map { dbModel ->
+            dbModel?.let {
+                Resource.Success(mapper(dbModel))
+            } ?: Resource.Error(Exception(DbErrors.UNKNOWN_DATA), null)
+        }
+        .catch {
+            Resource.Error(Exception(DbErrors.CAN_NOT_ACCESS_TO_DB), null)
+        }
+        .onStart {
+            emit(Resource.Loading)
+        }
 }

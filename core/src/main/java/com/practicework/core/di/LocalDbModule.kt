@@ -3,6 +3,7 @@ package com.practicework.core.di
 import android.content.Context
 import androidx.room.Room
 import com.practicework.core.room.AppDatabase
+import com.practicework.core.room.dao.ReposDao
 import com.practicework.core.room.dao.UserDao
 import dagger.Module
 import dagger.Provides
@@ -21,7 +22,7 @@ object LocalDbModule {
         return Room.databaseBuilder(
             context,
             AppDatabase::class.java,
-            "gitmit.db"
+            DB_NAME
         ).build()
     }
 
@@ -29,5 +30,11 @@ object LocalDbModule {
     @Singleton
     fun provideUserDao(appDatabase: AppDatabase) : UserDao {
         return appDatabase.userDao()
+    }
+
+    @Provides
+    @Singleton
+    fun provideReposDao(appDatabase: AppDatabase) : ReposDao {
+        return appDatabase.reposDao()
     }
 }
