@@ -2,31 +2,31 @@ package com.practicework.all_users.data.source
 
 import com.practicework.all_users.data.remote_data_source.models.AllUserApiModel
 import com.practicework.all_users.domain.models.AllUser
-import com.practicework.core.room.models.AllUserDbModel
+import com.practicework.core.room.models.AllUserEntity
 
 object Mappers {
 
     fun mapAllUserApiModelToAllUser(allUserApiModel: AllUserApiModel) : AllUser =
         AllUser(
-            login = allUserApiModel.login,
-            avatarUrl = allUserApiModel.avatarUrl
+            login = allUserApiModel.login ?: AllUser.FIELD_UNKNOWN,
+            avatarUrl = allUserApiModel.avatarUrl ?: AllUser.FIELD_UNKNOWN
         )
 
     fun mapAllUserApiModelListToAllUserList(list: List<AllUserApiModel>) : List<AllUser> =
         list.map { mapAllUserApiModelToAllUser(it) }
 
-    fun mapAllUserDbModelToAllUser(allUserDbModel: AllUserDbModel) : AllUser =
+    fun mapAllUserEntityToAllUser(allUserEntity: AllUserEntity) : AllUser =
         AllUser(
-            login = allUserDbModel.login,
-            avatarUrl = AllUser.AVATAR_UNKNOWN
+            login = allUserEntity.login,
+            avatarUrl = AllUser.FIELD_UNKNOWN
         )
 
-    fun mapAllUserDbModelListToAllUserList(list: List<AllUserDbModel>) : List<AllUser> =
-        list.map { mapAllUserDbModelToAllUser(it) }
+    fun mapAllUserEntityListToAllUserList(list: List<AllUserEntity>) : List<AllUser> =
+        list.map { mapAllUserEntityToAllUser(it) }
 
-    fun mapAllUserToAllUserDbModel(allUser: AllUser) : AllUserDbModel =
-        AllUserDbModel(login = allUser.login)
+    fun mapAllUserToAllUserEntity(allUser: AllUser) : AllUserEntity =
+        AllUserEntity(login = allUser.login)
 
-    fun mapAllUserListToAllUserDbModelList(list: List<AllUser>) : List<AllUserDbModel> =
-        list.map { mapAllUserToAllUserDbModel(it) }
+    fun mapAllUserListToAllUserEntityList(list: List<AllUser>) : List<AllUserEntity> =
+        list.map { mapAllUserToAllUserEntity(it) }
 }

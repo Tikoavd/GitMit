@@ -4,7 +4,7 @@ import com.practicework.all_users.domain.models.AllUser
 import com.practicework.core.retrofit.call_handler.Resource
 import kotlinx.coroutines.flow.Flow
 
-interface RemoteDataSource {
+interface AllUsersRemoteDataSource {
 
-    suspend fun getUsers(perPage: Int, page: Int) : Flow<Resource<List<AllUser>>>
+    suspend fun getUsers(perPage: Int, since: Int) : Flow<Resource<List<AllUser>>>
 }

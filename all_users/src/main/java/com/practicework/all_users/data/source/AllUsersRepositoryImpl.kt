@@ -1,30 +1,50 @@
 package com.practicework.all_users.data.source
 
-import com.practicework.all_users.data.local_data_source.LocalDataSource
-import com.practicework.all_users.data.remote_data_source.source.RemoteDataSource
+import com.practicework.all_users.data.local_data_source.AllUsersLocalDataSource
+import com.practicework.all_users.data.remote_data_source.source.AllUsersRemoteDataSource
 import com.practicework.all_users.domain.AllUsersRepository
 import com.practicework.all_users.domain.models.AllUser
+import com.practicework.core.coroutines.CommonDispatchers
+import com.practicework.core.retrofit.call_handler.ErrorTypes
 import com.practicework.core.retrofit.call_handler.Resource
-import com.practicework.core.room.call_handler.DbResource
-import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.*
 import javax.inject.Inject
 
 class AllUsersRepositoryImpl @Inject constructor(
-    private val remoteDataSource: RemoteDataSource,
-    private val localDataSource: LocalDataSource
+    private val remoteDataSource: AllUsersRemoteDataSource,
+    private val localDataSource: AllUsersLocalDataSource,
+    private val commonDispatchers: CommonDispatchers
 ) : AllUsersRepository {
-    override suspend fun getUsersFromApi(perPage: Int, since: Int): Flow<Resource<List<AllUser>>> =
-        remoteDataSource.getUsers(perPage, since)
 
-    override suspend fun insertUsersToDb(list: List<AllUser>) {
-        localDataSource.insertAllUsers(list)
-    }
-
-    override fun getUsersFromDb(offset: Int, select: Int): Flow<DbResource<List<AllUser>>> {
-        return localDataSource.getAllUsers(offset, select)
-    }
-
-    override suspend fun updateUsersInDb(list: List<AllUser>) {
-        localDataSource.updateAllUsers(list)
+    override fun getUsers(perPage: Int, since: Int): Flow<Resource<List<AllUser>>> {
+        return flow {
+            remoteDataSource.getUsers(perPage, since)
+                .onEach { resource ->
+                    when (resource) {
+                        is Resource.Error -> {
+                            if (resource.exception.message
+                                == ErrorTypes.NO_INTERNET_ACCESS.message
+                            ) {
+                                emitAll(
+                                    localDataSource.getAllUsers(offset = since, select = perPage)
+                                )
+                            } else emit(resource)
+                        }
+                        Resource.Loading -> {
+                            emit(resource)
+                        }
+                        is Resource.Success -> {
+                            if (since == 0) {
+                                localDataSource.updateAllUsers(resource.model)
+                            } else {
+                                localDataSource.insertAllUsers(resource.model)
+                            }
+                            emit(resource)
+                        }
+                    }
+                }
+                .flowOn(commonDispatchers.ioDispatcher)
+                .collect()
+        }
     }
 }

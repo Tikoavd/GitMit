@@ -8,9 +8,9 @@ import com.practicework.core.retrofit.call_handler.safeApiCall
 import kotlinx.coroutines.flow.Flow
 import javax.inject.Inject
 
-class RemoteDataSourceImpl @Inject constructor(
+class AllUsersRemoteDataSourceImpl @Inject constructor(
     private val apiService: AllUsersApiService
-) : RemoteDataSource {
+) : AllUsersRemoteDataSource {
     override suspend fun getUsers(perPage: Int, since: Int): Flow<Resource<List<AllUser>>> {
         return safeApiCall(
             mapper = { Mappers.mapAllUserApiModelListToAllUserList(it) },

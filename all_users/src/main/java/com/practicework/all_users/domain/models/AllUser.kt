@@ -5,6 +5,6 @@ data class AllUser(
     val avatarUrl: String
 ) {
     companion object {
-        const val AVATAR_UNKNOWN = "unknown"
+        const val FIELD_UNKNOWN = "unknown"
     }
 }

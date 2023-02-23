@@ -19,7 +19,7 @@ class ReposViewModel @Inject constructor(
     private val rxThreads: CommonRxThreads
 ) : ViewModel() {
 
-    private val getRepos = GetReposFromApiUseCase(reposRepository)
+    private val getRepos by lazy { GetReposFromApiUseCase(reposRepository) }
 
     private val _uiState = MutableStateFlow(ReposState())
     val uiState: StateFlow<ReposState>
