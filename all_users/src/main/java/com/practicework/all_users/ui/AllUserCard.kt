@@ -19,9 +19,12 @@ import com.practicework.all_users.R
 import com.practicework.all_users.domain.models.AllUser
 
 @Composable
-internal fun UserCard(user: AllUser) {
+internal fun UserCard(
+    modifier: Modifier = Modifier,
+    user: AllUser
+) {
     Card(
-        modifier = Modifier
+        modifier = modifier
             .padding(horizontal = 4.dp, vertical = 6.dp)
             .wrapContentHeight(),
         shape = RoundedCornerShape(8.dp),

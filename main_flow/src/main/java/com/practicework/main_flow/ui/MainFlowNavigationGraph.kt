@@ -4,7 +4,7 @@ import androidx.compose.runtime.Composable
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
-import com.practicework.all_users.ui.AllUsersScreen
+import com.practicework.all_users.ui.AllUsersNavHost
 import com.practicework.main_flow.presentation.NavItem
 import com.practicework.profile.ui.ProfileScreen
 import com.practicework.repos.ui.ReposScreen
@@ -20,7 +20,7 @@ internal fun MainFlowNavigationGraph(
         }
 
         composable(NavItem.Users.route) {
-            AllUsersScreen()
+            AllUsersNavHost()
         }
 
         composable(NavItem.Profile.route) {

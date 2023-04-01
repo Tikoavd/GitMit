@@ -1,7 +1,7 @@
 package com.practicework.details.data.source
 
 import com.practicework.core.retrofit.call_handler.Resource
-import com.practicework.details.data.remote_data_source.source.RemoteDataSource
+import com.practicework.details.data.remote_data_source.source.DetailsRemoteDataSource
 import com.practicework.details.domain.DetailsRepository
 import com.practicework.details.domain.models.Repo
 import com.practicework.details.domain.models.User
@@ -9,7 +9,7 @@ import kotlinx.coroutines.flow.Flow
 import javax.inject.Inject
 
 class DetailsRepositoryImpl @Inject constructor(
-    private val remoteDataSource: RemoteDataSource
+    private val remoteDataSource: DetailsRemoteDataSource
 ) : DetailsRepository {
     override suspend fun getUser(login: String): Flow<Resource<User>> {
         return remoteDataSource.getUser(login)

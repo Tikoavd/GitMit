@@ -9,9 +9,9 @@ import com.practicework.details.domain.models.User
 import kotlinx.coroutines.flow.Flow
 import javax.inject.Inject
 
-class RemoteDataSourceImpl @Inject constructor(
+class DetailsRemoteDataSourceImpl @Inject constructor(
     private val apiService: DetailsApiService
-) : RemoteDataSource {
+) : DetailsRemoteDataSource {
 
     override suspend fun getUser(login: String): Flow<Resource<User>> {
         return safeApiCall(

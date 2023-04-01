@@ -5,7 +5,7 @@ import com.practicework.details.domain.models.Repo
 import com.practicework.details.domain.models.User
 import kotlinx.coroutines.flow.Flow
 
-interface RemoteDataSource {
+interface DetailsRemoteDataSource {
 
     suspend fun getUser(login: String) : Flow<Resource<User>>
 
