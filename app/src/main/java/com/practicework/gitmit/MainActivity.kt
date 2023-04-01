@@ -9,8 +9,6 @@ import androidx.compose.material.Surface
 import androidx.compose.ui.Modifier
 import com.practicework.gitmit.ui.AppNavHost
 import com.practicework.gitmit.ui.theme.GitMitTheme
-import com.practicework.login.ui.LoginScreen
-import com.practicework.repos.ui.ReposScreen
 import dagger.hilt.android.AndroidEntryPoint
 
 @AndroidEntryPoint

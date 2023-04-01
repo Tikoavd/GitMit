@@ -1,16 +1,19 @@
 package com.practicework.main_flow.ui
 
-import androidx.compose.material.Text
 import androidx.compose.runtime.Composable
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import com.practicework.all_users.ui.AllUsersScreen
 import com.practicework.main_flow.presentation.NavItem
+import com.practicework.profile.ui.ProfileScreen
 import com.practicework.repos.ui.ReposScreen
 
 @Composable
-internal fun MainFlowNavigationGraph(navController: NavHostController) {
+internal fun MainFlowNavigationGraph(
+    navController: NavHostController,
+    navigateOnSignOut: () -> Unit
+) {
     NavHost(navController = navController, startDestination = NavItem.Repos.route) {
         composable(NavItem.Repos.route) {
             ReposScreen()
@@ -21,7 +24,7 @@ internal fun MainFlowNavigationGraph(navController: NavHostController) {
         }
 
         composable(NavItem.Profile.route) {
-            Text(text = "profile")
+            ProfileScreen(navigateOnSignOut = { navigateOnSignOut() })
         }
     }
 }

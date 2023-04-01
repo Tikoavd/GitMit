@@ -14,7 +14,6 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
-import androidx.lifecycle.viewmodel.compose.viewModel
 import com.practicework.login.R
 import com.practicework.login.presentation.LoginEvent
 import com.practicework.login.presentation.LoginViewModel
@@ -71,7 +70,10 @@ fun LoginScreen(
 
     val snackbarHostState = remember { SnackbarHostState() }
 
-    Box(contentAlignment = Alignment.BottomCenter) {
+    Box(
+        modifier = Modifier.fillMaxSize(),
+        contentAlignment = Alignment.BottomCenter
+    ) {
         SnackbarHost(
             hostState = snackbarHostState
         ) {
