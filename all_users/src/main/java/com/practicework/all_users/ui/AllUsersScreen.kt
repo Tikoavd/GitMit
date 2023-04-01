@@ -1,5 +1,6 @@
 package com.practicework.all_users.ui
 
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.lazy.LazyColumn
@@ -22,7 +23,8 @@ import com.practicework.all_users.presentation.AllUsersViewModel
 @Composable
 fun AllUsersScreen(
     modifier: Modifier = Modifier,
-    vm: AllUsersViewModel = hiltViewModel()
+    vm: AllUsersViewModel = hiltViewModel(),
+    onNavigateToDetails: (String) -> Unit
 ) {
     val allUsersState by vm.uiState.collectAsState()
     val refreshState =
@@ -48,7 +50,12 @@ fun AllUsersScreen(
                 if (index >= allUsersState.userList.size - 1 && !allUsersState.isLoading) {
                     vm.send(AllUsersEvent.GetMore)
                 }
-                UserCard(allUsersState.userList[index])
+                UserCard(
+                    modifier = Modifier.clickable { onNavigateToDetails(
+                        allUsersState.userList[index].login
+                    ) },
+                    user = allUsersState.userList[index]
+                )
             }
             item {
                 if (allUsersState.isLoading) {
