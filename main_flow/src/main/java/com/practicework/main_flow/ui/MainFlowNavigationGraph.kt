@@ -5,6 +5,7 @@ import androidx.compose.runtime.Composable
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
+import com.practicework.all_users.ui.AllUsersScreen
 import com.practicework.main_flow.presentation.NavItem
 import com.practicework.repos.ui.ReposScreen
 
@@ -16,7 +17,7 @@ internal fun MainFlowNavigationGraph(navController: NavHostController) {
         }
 
         composable(NavItem.Users.route) {
-            Text(text = "users")
+            AllUsersScreen()
         }
 
         composable(NavItem.Profile.route) {

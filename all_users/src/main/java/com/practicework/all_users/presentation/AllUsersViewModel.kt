@@ -1,30 +1,27 @@
-package com.practicework.repos.presentation
+package com.practicework.all_users.presentation
 
 import androidx.lifecycle.ViewModel
+import androidx.lifecycle.viewModelScope
+import com.practicework.all_users.domain.AllUsersRepository
+import com.practicework.all_users.domain.models.AllUser
+import com.practicework.all_users.domain.usecases.GetUsersUseCase
+import com.practicework.core.coroutines.CommonDispatchers
 import com.practicework.core.retrofit.call_handler.Resource
-import com.practicework.core.rx.CommonRxThreads
-import com.practicework.repos.domain.ReposRepository
-import com.practicework.repos.domain.models.Repo
-import com.practicework.repos.domain.usecases.GetReposFromApiUseCase
 import dagger.hilt.android.lifecycle.HiltViewModel
-import kotlinx.coroutines.flow.MutableStateFlow
-import kotlinx.coroutines.flow.StateFlow
-import kotlinx.coroutines.flow.asStateFlow
-import kotlinx.coroutines.flow.update
+import kotlinx.coroutines.flow.*
 import javax.inject.Inject
 
 @HiltViewModel
-class ReposViewModel @Inject constructor(
-    reposRepository: ReposRepository,
-    private val rxThreads: CommonRxThreads
+class AllUsersViewModel @Inject constructor(
+    allUsersRepository: AllUsersRepository,
+    private val commonDispatchers: CommonDispatchers
 ) : ViewModel() {
 
-    private val getRepos by lazy { GetReposFromApiUseCase(reposRepository) }
+    private val getUsersUseCase by lazy { GetUsersUseCase(allUsersRepository) }
 
-    private val _uiState = MutableStateFlow(ReposState())
-    val uiState: StateFlow<ReposState>
+    private val _uiState = MutableStateFlow(AllUsersState())
+    val uiState: StateFlow<AllUsersState>
         get() = _uiState.asStateFlow()
-
     private var page = 1
     private var endReached = false
 
@@ -32,25 +29,23 @@ class ReposViewModel @Inject constructor(
         update()
     }
 
-    fun send(event: ReposEvent) {
+    fun send(event: AllUsersEvent) {
         when (event) {
-            ReposEvent.GetMoreRepos -> {
+            AllUsersEvent.GetMore -> {
                 if (!endReached) {
-                    getMoreRepos()
+                    getMoreUsers()
                 }
             }
 
-            ReposEvent.UpdateRepos -> {
+            AllUsersEvent.Update -> {
                 update()
             }
         }
     }
 
-    private fun getRepos() {
-        getRepos(PER_PAGE_VALUE, page)
-            .subscribeOn(rxThreads.ioThread)
-            .observeOn(rxThreads.mainThread)
-            .subscribe { resource ->
+    private fun getUsers() {
+        getUsersUseCase(PER_PAGE_VALUE, page)
+            .onEach { resource ->
                 when (resource) {
                     is Resource.Success -> {
                         handleSuccess(resource.model)
@@ -59,31 +54,30 @@ class ReposViewModel @Inject constructor(
                     is Resource.Error -> {
                         handleError()
                     }
-
                     else -> Unit
                 }
             }
+            .flowOn(commonDispatchers.ioDispatcher)
+            .launchIn(viewModelScope)
     }
 
     private fun handleError() {
         endReached = true
-
         _uiState.update { current ->
             current.copy(isLoading = false, isUpdating = false)
         }
     }
 
-    private fun handleSuccess(appendList: List<Repo>) {
+    private fun handleSuccess(appendList: List<AllUser>) {
         if (appendList.isEmpty()) {
             endReached = true
             _uiState.update { current ->
                 current.copy(isLoading = false, isUpdating = false)
             }
-        }
-        else {
+        } else {
             _uiState.update { current ->
-                val newList = current.repos + appendList
-                current.copy(repos = newList, isLoading = false, isUpdating = false)
+                val newList = current.userList + appendList
+                current.copy(userList = newList, isLoading = false, isUpdating = false)
             }
             page++
         }
@@ -91,21 +85,21 @@ class ReposViewModel @Inject constructor(
 
     private fun update() {
         _uiState.update { current ->
-            current.copy(repos = listOf(), isUpdating = true)
+            current.copy(userList = listOf(), isUpdating = true)
         }
         page = 1
         endReached = false
-        getRepos()
+        getUsers()
     }
 
-    private fun getMoreRepos() {
+    private fun getMoreUsers() {
         _uiState.update { current ->
             current.copy(isLoading = true)
         }
-        getRepos()
+        getUsers()
     }
 
     companion object {
-        private const val PER_PAGE_VALUE = 10
+        private const val PER_PAGE_VALUE = 15
     }
 }
