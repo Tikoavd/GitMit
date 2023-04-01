@@ -1,14 +1,14 @@
 package com.practicework.profile.data.source
 
-import com.practicework.core.room.models.UserDbModel
+import com.practicework.core.room.models.UserEntity
 import com.practicework.profile.domain.models.User
 
 object Mappers {
 
-    fun mapUserDbModelToUser(userDbModel: UserDbModel) : User =
+    fun mapUserDbModelToUser(userEntity: UserEntity): User =
         User(
-            login = userDbModel.login,
-            followingCount = userDbModel.followingCount,
-            followersCount = userDbModel.followersCount
+            login = userEntity.login,
+            followingCount = userEntity.followingCount,
+            followersCount = userEntity.followersCount
         )
 }

@@ -3,36 +3,28 @@ package com.practicework.profile.ui
 import android.Manifest
 import android.content.Context
 import android.content.pm.PackageManager
-import android.graphics.Bitmap
 import android.os.Build
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.PickVisualMediaRequest
 import androidx.activity.result.contract.ActivityResultContracts
-import androidx.compose.foundation.Image
-import androidx.compose.foundation.clickable
 import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.foundation.layout.*
-import androidx.compose.foundation.shape.CircleShape
-import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.material.*
+import androidx.compose.material.ButtonDefaults
+import androidx.compose.material.OutlinedButton
+import androidx.compose.material.Switch
+import androidx.compose.material.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.graphics.asImageBitmap
-import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
-import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.core.content.ContextCompat
 import androidx.hilt.navigation.compose.hiltViewModel
-import com.practicework.profile.R
-import com.practicework.profile.domain.models.User
 import com.practicework.profile.presentation.ProfileEvent
 import com.practicework.profile.presentation.ProfileViewModel
 
@@ -148,103 +140,6 @@ fun ProfileScreen(
     }
 }
 
-@Composable
-private fun UserCard(
-    user: User,
-    bitmap: Bitmap?,
-    onImageClick: () -> Unit
-) {
-    Card(
-        modifier = Modifier
-            .padding(horizontal = 4.dp, vertical = 6.dp)
-            .fillMaxWidth(),
-        shape = RoundedCornerShape(8.dp),
-        elevation = 8.dp
-    ) {
-        Column(horizontalAlignment = Alignment.CenterHorizontally) {
-            if (bitmap != null) {
-                Image(
-                    bitmap = bitmap.asImageBitmap(),
-                    contentDescription = "avatar",
-                    modifier = Modifier
-                        .fillMaxHeight(0.6f)
-                        .padding(12.dp)
-                        .clip(CircleShape)
-                        .clickable {
-                            onImageClick()
-                        },
-                    contentScale = ContentScale.FillHeight
-                )
-            } else {
-                Image(
-                    painter = painterResource(id = R.drawable.avatar),
-                    contentDescription = "avatar",
-                    modifier = Modifier
-                        .fillMaxHeight(0.6f)
-                        .padding(12.dp)
-                        .clip(CircleShape)
-                        .clickable {
-                            onImageClick()
-                        },
-                    contentScale = ContentScale.FillHeight
-                )
-            }
-
-
-            Box(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .wrapContentHeight()
-            ) {
-                Text(
-                    modifier = Modifier.fillMaxWidth(),
-                    textAlign = TextAlign.Center,
-                    fontSize = 20.sp,
-                    text = user.login
-                )
-            }
-
-            Spacer(modifier = Modifier.height(8.dp))
-            Row(
-                horizontalArrangement = Arrangement.Center
-            ) {
-                FollowCard(
-                    text = "followers",
-                    count = user.followersCount,
-                    color = MaterialTheme.colors.primary
-                )
-
-                Spacer(modifier = Modifier.width(8.dp))
-
-                FollowCard(
-                    text = "following",
-                    count = user.followingCount,
-                    color = MaterialTheme.colors.secondary
-                )
-            }
-            Spacer(modifier = Modifier.height(12.dp))
-        }
-    }
-}
-
-@Composable
-private fun FollowCard(
-    text: String,
-    count: Int,
-    color: Color
-) {
-    Card(
-        shape = RoundedCornerShape(8.dp),
-        elevation = 16.dp,
-        backgroundColor = color
-    ) {
-        Text(
-            modifier = Modifier.padding(2.dp),
-            text = "$text $count",
-            color = Color.White
-        )
-    }
-}
 
 private fun checkPermission(context: Context): Boolean {
     return if (Build.VERSION.SDK_INT <= 32) {

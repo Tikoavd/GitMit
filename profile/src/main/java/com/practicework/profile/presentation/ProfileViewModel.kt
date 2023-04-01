@@ -13,7 +13,7 @@ import com.practicework.core.datastore.*
 import com.practicework.core.di.EMPTY_TOKEN
 import com.practicework.core.di.SHARED_PREF_NAME
 import com.practicework.core.di.TOKEN
-import com.practicework.core.room.call_handler.DbResource
+import com.practicework.core.retrofit.call_handler.Resource
 import com.practicework.profile.domain.ProfileRepository
 import com.practicework.profile.domain.models.User
 import com.practicework.profile.domain.usecases.ClearAllDataUseCase
@@ -28,7 +28,7 @@ import javax.inject.Inject
 @HiltViewModel
 class ProfileViewModel @Inject constructor(
     @ApplicationContext private val context: Context,
-    private val profileRepository: ProfileRepository,
+    profileRepository: ProfileRepository,
 ) : ViewModel() {
 
     private val getUserFromDb = GetUserFromDbUseCase(profileRepository)
@@ -141,7 +141,7 @@ class ProfileViewModel @Inject constructor(
     private fun getUser() {
         getUserFromDb()
             .onEach { dbResource ->
-                if (dbResource is DbResource.Success) {
+                if (dbResource is Resource.Success) {
                     updateUser(dbResource.model)
                 }
             }

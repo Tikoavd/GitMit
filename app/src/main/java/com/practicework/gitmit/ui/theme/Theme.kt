@@ -1,6 +1,5 @@
 package com.practicework.gitmit.ui.theme
 
-import android.util.Log
 import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.material.MaterialTheme
 import androidx.compose.material.darkColors
@@ -38,7 +37,6 @@ fun GitMitTheme(
     content: @Composable () -> Unit
 ) {
     val isDarkTheme by vm.nightMode.collectAsState()
-    Log.e("theme", "comp: $isDarkTheme")
     val colors = when (isDarkTheme) {
         true -> { DarkColorPalette }
         false -> { LightColorPalette }

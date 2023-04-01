@@ -21,7 +21,10 @@ fun MainFlowScreen(
         backgroundColor = MaterialTheme.colors.background
     ) {
         Surface(Modifier.fillMaxHeight(0.92f)) {
-            MainFlowNavigationGraph(navController = navHostController)
+            MainFlowNavigationGraph(
+                navController = navHostController,
+                navigateOnSignOut = navigateOnSignOut
+            )
         }
     }
 }
